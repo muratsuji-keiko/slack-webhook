@@ -85,6 +85,11 @@ def slack_webhook():
             return "Slack Webhook is active!", 200  # Request URL の確認用
 
         data = request.json
+
+        # ✅ Slack の Challenge Request に対応（追加）
+        if "challenge" in data:
+            return jsonify({"challenge": data["challenge"]})  # Challenge をそのまま返す
+
         event = data.get("event", {})
 
         # ボットメッセージを無視
