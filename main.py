@@ -55,13 +55,16 @@ def get_user_info(user_id):
 
     if data.get("ok"):
         user_profile = data.get("user", {})
+        profile = user_profile.get("profile", {})
+
         return {
             "user_id": user_id,
             "real_name": user_profile.get("real_name", "Unknown"),
-            "display_name": user_profile.get("profile", {}).get("display_name", "Unknown"),
-            "email": user_profile.get("profile", {}).get("email", "Unknown")
+            "display_name": profile.get("display_name", "Unknown"),
+            "full_name": profile.get("real_name_normalized", "Unknown"),
+            "email": profile.get("email", "Unknown")
         }
-    return {"user_id": user_id, "real_name": "Unknown", "display_name": "Unknown", "email": "Unknown"}
+    return {"user_id": user_id, "real_name": "Unknown", "display_name": "Unknown", "full_name": "Unknown", "email": "Unknown"}
 
 # 🔹 Slack API でチャンネル名を取得する関数
 def get_channel_name(channel_id):
@@ -101,7 +104,7 @@ def slack_webhook():
         user_info = get_user_info(user_id)
 
         # ✅ Console にログを出力
-        print(f"📡 Message received from User: {user_info['real_name']} ({user_info['display_name']})")
+        print(f"📡 Message received from User: {user_info['real_name']} (Display: {user_info['display_name']}, Full: {user_info['full_name']})")
         print(f"💬 Message: {event.get('text', 'No text provided')}")
 
         # ✅ Zapier にデータを送信
@@ -109,6 +112,7 @@ def slack_webhook():
             "user_id": user_info["user_id"],
             "real_name": user_info["real_name"],
             "display_name": user_info["display_name"],
+            "full_name": user_info["full_name"],
             "email": user_info["email"],
             "text": event.get("text", ""),
             "channel": event.get("channel", ""),
