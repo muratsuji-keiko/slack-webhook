@@ -116,11 +116,20 @@ def slack_webhook():
             "text": event.get("text", ""),
             "channel": event.get("channel", ""),
             "ts": event.get("ts", ""),
+            "thread_ts": event.get("thread_ts", ""),  # 🔹 スレッドのトップメッセージの ts を追加
             "team": event.get("team", ""),
             "client_msg_id": event.get("client_msg_id", ""),
             "event_ts": event.get("event_ts", ""),
             "blocks": event.get("blocks", [])
         }
+
+        # ✅ Slack メッセージの URL を作成
+        base_url = f"https://tsuchinoko.slack.com/archives/{zapier_data['channel']}/p{zapier_data['ts'].replace('.', '')}"
+        if zapier_data["thread_ts"]:
+            base_url += f"?thread_ts={zapier_data['thread_ts']}&cid={zapier_data['channel']}"
+
+        print(f"🔗 Slack メッセージリンク: {base_url}")
+        zapier_data["message_url"] = base_url
 
         response = requests.post(ZAPIER_WEBHOOK_URL, json=zapier_data)
         print(f"📡 Sent data to Zapier: {response.status_code} - {response.text}")
